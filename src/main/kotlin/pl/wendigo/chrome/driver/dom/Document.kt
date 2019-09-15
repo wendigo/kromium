@@ -99,27 +99,27 @@ class Document(
 
     private fun observeLoading() {
         api.Page.frameNavigatedTimed()
-        .observeOn(Schedulers.io())
-        .filter { it.value().frame.id == frameId.get() }
-        .subscribe { event ->
-            synchronized(this) {
-                logger.timedInfo(event.time(), "Frame ${event.value().frame.id} navigated...")
+            .observeOn(Schedulers.io())
+            .filter { it.value().frame.id == frameId.get() }
+            .subscribe { event ->
+                synchronized(this) {
+                    logger.timedInfo(event.time(), "Frame ${event.value().frame.id} navigated...")
+                }
             }
-        }
 
         api.Page.frameStartedLoadingTimed()
-        .observeOn(Schedulers.io())
-        .filter { it.value().frameId == frameId.get() }
-        .subscribe { event ->
-            runOnIncrementalTimestamp(event, {
-                logger.timedInfo(event.time(), "Frame ${event.value().frameId} started loading, setting status to NAVIGATING")
+            .observeOn(Schedulers.io())
+            .filter { it.value().frameId == frameId.get() }
+            .subscribe { event ->
+                runOnIncrementalTimestamp(event, {
+                    logger.timedInfo(event.time(), "Frame ${event.value().frameId} started loading, setting status to NAVIGATING")
 
-                startNavigating()
-                event.time()
-            }, {
-                logger.timedInfo(event.time(), "Event ${event.value()} discarded, happened before last registered")
-            })
-        }
+                    startNavigating()
+                    event.time()
+                }, {
+                    logger.timedInfo(event.time(), "Event ${event.value()} discarded, happened before last registered")
+                })
+            }
 
         api.Page.frameStoppedLoadingTimed()
             .observeOn(Schedulers.io())
@@ -136,19 +136,18 @@ class Document(
                 logger.timedInfo(event.time(), "Lifecycle event ${event.value().name} fired")
             }
             .filter {
-                it.value().name == "DOMContentLoaded" || it.value().name == "networkIdle"
+                (it.value().name == "DOMContentLoaded" || it.value().name == "networkIdle").and(it.value().frameId.contentEquals(frameId.get()))
             }
             .subscribe { event ->
                 runOnIncrementalTimestamp(event, {
-
                     when (event.value().name) {
                         "DOMContentLoaded" -> {
-                            logger.timedInfo(event.time(), "Frame ${this@Document.frameId.get()} fired load event, setting status to LOADED")
+                            logger.timedInfo(event.time(), "Frame ${event.value().frameId} fired load event, setting status to LOADED")
                             status = LoadingStatus.LOADED
                             reloadRootId()
                         }
                         "networkIdle" -> {
-                            logger.timedInfo(event.time(), "Frame ${this@Document.frameId.get()} fired networkIdle event, setting status to IDLE")
+                            logger.timedInfo(event.time(), "Frame ${event.value().frameId} fired networkIdle event, setting status to IDLE")
                             status = LoadingStatus.IDLE
                         }
                     }
@@ -186,13 +185,14 @@ class Document(
      * Navigates document to new url.
      */
     fun navigate(url : String) : Document {
-
         val currentLocation = location()
 
         if (url.removePrefix(currentLocation).startsWith("#")) {
             evaluate("(function() { return window.location.href = '$url'; })();")
         } else {
             logger.info("Navigating to $url from ${location()}...")
+
+            startNavigating()
 
             val loadingFrameId = context.enableDomains.flatMap {
                 api.Page.navigate(NavigateRequest(url = url))
