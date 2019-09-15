@@ -29,8 +29,7 @@ class StaticServer {
         server.handler = handler
         server.start()
 
-        //def address = System.getenv("LOOPBACK_ADDRESS")
-        def address = "192.168.1.63"
+        def address = System.getenv("LOOPBACK_ADDRESS")
 
         if (address == null) {
             localAddress = "http://${InetAddress.getLocalHost().getHostAddress()}:${getPort()}/"
