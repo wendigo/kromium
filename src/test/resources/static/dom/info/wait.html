@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<input id="waitFor" value="Hello!" />
+
+<style type="text/css">
+    #waitFor {
+        display: none;
+    }
+</style>
+
+<script type="text/javascript">
+
+    window.onload = function() {
+        console.log("firing");
+        var element = document.getElementById('waitFor');
+
+        setTimeout(function() {
+            this.style.display = 'block';
+        }.bind(element), 100);
+
+        if (document.activeElement == element) {
+            throw Exception("Should not happen");
+        }
+
+        setTimeout(function() {
+            this.focus();
+        }.bind(element), 1000);
+    }
+
+</script>
+</body>
+</html>

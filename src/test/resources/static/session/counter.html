@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="counter">
+</div>
+
+<div id="storage"></div>
+<script type="text/javascript">
+    window.onload = function() {
+        for (var i = 0; i < 100; i++) {
+            setTimeout(function(val) {
+                counter = parseInt(localStorage.getItem('counter') || 0) + 1;
+                localStorage.setItem('counter', counter);
+
+                document.getElementById('storage').innerHTML = counter;
+                document.getElementById('counter').innerHTML = this;
+            }.bind(i), 10 * i);
+        }
+    };
+</script>
+</body>
+</html>

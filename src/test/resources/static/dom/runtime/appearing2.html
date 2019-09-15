@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style type="text/css">
+    div#appearing {
+        display: none;
+        background: green;
+        color: red;
+    }
+</style>
+<div id="loading">Loaded...</div>
+</body>
+
+<script type="text/javascript">
+
+    window.onload = function() {
+        setTimeout(function() {
+            document.getElementById("loading").innerHTML = "<div id='appearing'>Appeared!</div>";
+        }, 300);
+
+        setTimeout(function() {
+            document.getElementById('appearing').style.display = 'block';
+        }, 800);
+    }
+</script>
+
+</html>

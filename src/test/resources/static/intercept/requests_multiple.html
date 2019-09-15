@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="response" style="display: none"></div>
+<script type="text/javascript">
+    window.onload = function() {
+        for (var i = 0; i < 10; i++) {
+            setTimeout(function() {
+                fetch('query.json').then(function(response) {
+                    response.text().then(function(text) {
+                        console.log("captured ", text);
+                    });
+                });
+            }, i * 100);
+        }
+    };
+</script>
+</body>
+</html>

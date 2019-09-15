@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="response" style="display: none"></div>
+<script type="text/javascript">
+    window.onload = function() {
+        try {
+            fetch('query.json').then(function(response) {
+                document.getElementById('response').innerHTML = response.statusText;
+                document.getElementById('response').style.display = 'block';
+            }).catch(function(error) {
+                document.getElementById('response').innerHTML = error;
+                document.getElementById('response').style.display = 'block';
+            });
+        } catch (err) {
+            document.getElementById('response').innerHTML = err;
+            document.getElementById('response').style.display = 'block';
+        }
+    };
+</script>
+</body>
+</html>
