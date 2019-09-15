@@ -73,6 +73,9 @@ dependencies {
     testRuntime group: 'cglib', name: 'cglib-nodep', version: '3.3.0'
     testRuntime group: 'org.objenesis', name: 'objenesis', version: '3.0.1'
 
+    testCompile group: 'org.testcontainers', name: 'testcontainers', version: '1.12.1'
+    testCompile group: 'org.testcontainers', name: 'spock', version: '1.12.1'
+
     ktlint group: 'com.github.shyiko', name: 'ktlint', version: '0.31.0'
 }
 

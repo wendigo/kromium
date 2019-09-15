@@ -1,21 +1,16 @@
 package pl.wendigo.chrome.driver.rules
 
 import org.junit.rules.ExternalResource
+import org.testcontainers.containers.GenericContainer
 import pl.wendigo.chrome.driver.SessionManager
 import pl.wendigo.chrome.driver.session.Session
 
 class TestSession extends ExternalResource {
-    private static SessionManager browser
+    private SessionManager browser
     private Session session
 
-    static  {
-        def address = System.getenv("HEADLESS_ADDRESS")
-
-        if (address == null) {
-            address = "localhost:9222"
-        }
-
-        browser = new SessionManager.Companion().connect(address)
+    TestSession(GenericContainer container) {
+        browser = new SessionManager.Companion().connect(container.getContainerIpAddress() + ":" + container.getFirstMappedPort())
     }
 
     @Override
