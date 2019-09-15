@@ -30,7 +30,7 @@ open class Session constructor(
 
     private val context : SessionContext = SessionContext(logger = logger, protocol = protocol, session = this@Session)
     private val document : Document = Document(FrameId(), context)
-    private val closed : AtomicBoolean = AtomicBoolean(false)
+    protected val closed : AtomicBoolean = AtomicBoolean(false)
 
     /**
      * Overrides user agent.

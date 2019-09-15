@@ -12,7 +12,7 @@ class TestSession extends ExternalResource {
         def address = System.getenv("HEADLESS_ADDRESS")
 
         if (address == null) {
-            address = "localhost:9223"
+            address = "localhost:9222"
         }
 
         browser = new SessionManager.Companion().connect(address)

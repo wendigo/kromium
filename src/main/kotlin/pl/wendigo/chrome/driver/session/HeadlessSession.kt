@@ -2,6 +2,8 @@ package pl.wendigo.chrome.driver.session
 
 import org.slf4j.LoggerFactory
 import pl.wendigo.chrome.Browser
+import pl.wendigo.chrome.driver.timedInfo
+import pl.wendigo.chrome.driver.timedWarn
 import pl.wendigo.chrome.headless.HeadlessDevToolsProtocol
 import pl.wendigo.chrome.protocol.inspector.InspectablePage
 
@@ -14,7 +16,7 @@ class HeadlessSession constructor(
                 url = protocol.sessionDescriptor.url,
                 id = protocol.sessionDescriptor.sessionId,
                 title = "",
-                type = "",
+                type = "page",
                 webSocketDebuggerUrl = "",
                 devtoolsFrontendUrl = ""
         ),
@@ -36,12 +38,19 @@ class HeadlessSession constructor(
         return "headlessSession{$info}"
     }
 
+    /**
+     * Closes connection to chrome debugger.
+     */
     override fun close() {
-        try {
-            super.close()
-            protocol.close()
-        } catch (e : Throwable) {
-            logger.warn("Caught exception while closing session {}", e.message)
+        if (closed.compareAndSet(false, true)) {
+            logger.timedInfo(System.currentTimeMillis(), "Closing session ${protocol.sessionDescriptor}")
+
+            try {
+                protocol.close()
+                logger.timedInfo(System.currentTimeMillis(), "Closed session ${protocol.sessionDescriptor}")
+            } catch (e : Exception) {
+                logger.timedWarn(System.currentTimeMillis(), "Could not close session ${protocol.sessionDescriptor}: ${e.message}")
+            }
         }
     }
 
