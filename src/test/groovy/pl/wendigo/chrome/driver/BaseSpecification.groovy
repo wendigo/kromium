@@ -13,7 +13,7 @@ class BaseSpecification extends Specification {
     StaticServer server = StaticServer.instance()
 
     @Shared
-    public GenericContainer container = new GenericContainer("zenika/alpine-chrome")
+    public GenericContainer container = new GenericContainer("zenika/alpine-chrome:76")
             .withExposedPorts(9222)
             .withCommand(
                     "chromium-browser",
@@ -22,6 +22,7 @@ class BaseSpecification extends Specification {
                     "--disable-software-rasterizer",
                     "--disable-dev-shm-usage",
                     "--no-sandbox",
+                    "--disable-setuid-sandbox",
                     "--remote-debugging-port=9222",
                     "--remote-debugging-address=0.0.0.0",
                     "about:blank"

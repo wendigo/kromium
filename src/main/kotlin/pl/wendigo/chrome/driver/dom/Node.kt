@@ -734,7 +734,7 @@ open class Node(
     override fun toString() = "Node($nodeId)[${path()}]"
 
     internal val api by lazy {
-        context.protocol
+        context.target
     }
 
     val logger by lazy {

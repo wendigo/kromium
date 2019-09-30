@@ -25,18 +25,18 @@ class ScreenCast(
 
     override fun start(parentNode: Node, context: SessionContext, filter: InterceptFilter<FrameId>) {
         subscription = context.enablePage.flatMapPublisher {
-            context.protocol.Page.startScreencast(StartScreencastRequest(
+            context.target.Page.startScreencast(StartScreencastRequest(
                 format = format,
                 quality = quality,
                 maxWidth = height,
                 maxHeight = height,
                 everyNthFrame = everyNthFrame
             )).flatMapPublisher {
-                context.protocol.Page.screencastFrame()
+                context.target.Page.screencastFrame()
             }
         }
         .flatMapSingle { frame ->
-            context.protocol.Page.screencastFrameAck(ScreencastFrameAckRequest(frame.sessionId)).map {
+            context.target.Page.screencastFrameAck(ScreencastFrameAckRequest(frame.sessionId)).map {
                 frame
             }
         }

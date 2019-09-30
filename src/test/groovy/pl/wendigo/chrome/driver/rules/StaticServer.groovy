@@ -5,7 +5,6 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.server.ServerConnector
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.servlet.ServletContextHandler
-import org.junit.rules.ExternalResource
 
 import java.util.concurrent.atomic.AtomicReference
 

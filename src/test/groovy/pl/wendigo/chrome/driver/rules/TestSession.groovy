@@ -15,7 +15,7 @@ class TestSession extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
-        session = browser.newHeadlessSession(1024, 768, 128)
+        session = browser.newSession()
     }
 
     @Override
@@ -28,10 +28,10 @@ class TestSession extends ExternalResource {
     }
 
     Session headless() {
-        return browser.newHeadlessSession(1024, 769, 128)
+        return browser.newIncognitoSession()
     }
 
     Session head() {
-        return browser.newSession(128)
+        return browser.newIncognitoSession()
     }
 }

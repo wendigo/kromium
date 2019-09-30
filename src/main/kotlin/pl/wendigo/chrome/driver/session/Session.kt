@@ -3,7 +3,6 @@ package pl.wendigo.chrome.driver.session
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import pl.wendigo.chrome.Browser
-import pl.wendigo.chrome.DevToolsProtocol
 import pl.wendigo.chrome.api.network.GetCertificateRequest
 import pl.wendigo.chrome.api.network.SetBlockedURLsRequest
 import pl.wendigo.chrome.api.network.SetUserAgentOverrideRequest
@@ -12,7 +11,7 @@ import pl.wendigo.chrome.driver.SessionContext
 import pl.wendigo.chrome.driver.dom.Document
 import pl.wendigo.chrome.driver.timedInfo
 import pl.wendigo.chrome.driver.timedWarn
-import pl.wendigo.chrome.protocol.inspector.InspectablePage
+import pl.wendigo.chrome.targets.Target
 import java.io.Closeable
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -22,13 +21,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Session represents single, debuggable chrome session.
  */
 open class Session constructor(
-        private val page : InspectablePage,
-        private val protocol: DevToolsProtocol,
-        private val browser: Browser,
-        protected val logger : Logger = LoggerFactory.getLogger("session-${page.id}")
+    private val target : Target,
+    private val browser: Browser,
+    protected val logger : Logger = LoggerFactory.getLogger("target-${target.session.targetId}")
 ) : Closeable {
 
-    private val context : SessionContext = SessionContext(logger = logger, protocol = protocol, session = this@Session)
+    private val context : SessionContext = SessionContext(logger = logger, session = this@Session, target = target)
     private val document : Document = Document(FrameId(), context)
     protected val closed : AtomicBoolean = AtomicBoolean(false)
 
@@ -37,7 +35,7 @@ open class Session constructor(
      */
     fun userAgent(userAgent : String) : Session {
         context.enableNetwork.flatMap {
-            protocol.Network.setUserAgentOverride(SetUserAgentOverrideRequest(userAgent))
+            target.Network.setUserAgentOverride(SetUserAgentOverrideRequest(userAgent))
         }.blockingGet()
 
         return this
@@ -48,7 +46,7 @@ open class Session constructor(
      */
     fun blockUrls(vararg urls : String) : Session {
         context.enableNetwork.flatMap {
-            protocol.Network.setBlockedURLs(SetBlockedURLsRequest(urls.asList()))
+            target.Network.setBlockedURLs(SetBlockedURLsRequest(urls.asList()))
         }.blockingGet()
 
         return this
@@ -59,7 +57,7 @@ open class Session constructor(
      */
     fun certificates(origin : String) : List<X509Certificate> {
         val list = context.enableNetwork.flatMap {
-            protocol.Network.getCertificate(GetCertificateRequest(origin))
+            target.Network.getCertificate(GetCertificateRequest(origin))
         }.blockingGet().tableNames
 
         val certificates = mutableListOf<X509Certificate>()
@@ -101,31 +99,26 @@ open class Session constructor(
     }
 
     override fun toString() : String {
-        val info = mapOf(
-            "debuggerUrl" to page.webSocketDebuggerUrl
-        )
-
-        return "Session{$info}"
+        return target.toString()
     }
 
     /**
      * Returns identifier of the session.
      */
-    open fun id() = "session{pageId=${page.id}}"
+    open fun id() = "session{targetId=${target.session.targetId}}"
 
     /**
      * Closes connection to chrome debugger.
      */
     override fun close() {
         if (closed.compareAndSet(false, true)) {
-            logger.timedInfo(System.currentTimeMillis(), "Closing session $page")
+            logger.timedInfo(System.currentTimeMillis(), "Closing target $target")
 
             try {
-                protocol.close()
-                browser.closePage(page)
-                logger.timedInfo(System.currentTimeMillis(), "Closed session $page")
+                browser.close(target)
+                logger.timedInfo(System.currentTimeMillis(), "Closed target $target")
             } catch (e : Exception) {
-                logger.timedWarn(System.currentTimeMillis(), "Could not close session $page: ${e.message}")
+                logger.timedWarn(System.currentTimeMillis(), "Could not close target $target: ${e.message}")
             }
         }
     }

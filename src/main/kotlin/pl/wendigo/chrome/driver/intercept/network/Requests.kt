@@ -22,10 +22,10 @@ class Requests : Interceptor<Response, List<pl.wendigo.chrome.driver.intercept.n
     private var intercepted = listOf<pl.wendigo.chrome.driver.intercept.network.Response>()
 
     override fun start(parentNode: Node, context: SessionContext, filter: InterceptFilter<Response>) {
-        subscription = context.protocol.Network.responseReceived().filter { event ->
+        subscription = context.target.Network.responseReceived().filter { event ->
             filter.accept(event.response)
         }.flatMapSingle { response ->
-            context.protocol.Network.loadingFinished().filter {
+            context.target.Network.loadingFinished().filter {
                 it.requestId == response.requestId
             }.firstOrError().map {
                 Pair(response.response, it.requestId)
@@ -68,7 +68,7 @@ class Requests : Interceptor<Response, List<pl.wendigo.chrome.driver.intercept.n
 
         context.logger.timedInfo(System.currentTimeMillis(), "Retrieving response for request $id")
 
-        return context.protocol.Network.getResponseBody(GetResponseBodyRequest(id))
+        return context.target.Network.getResponseBody(GetResponseBodyRequest(id))
             .map {
                 if (it.base64Encoded) {
                     String(Base64.getDecoder().decode(it.body))

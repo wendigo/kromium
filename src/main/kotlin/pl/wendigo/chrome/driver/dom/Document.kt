@@ -98,7 +98,8 @@ class Document(
     }
 
     private fun observeLoading() {
-        api.Page.frameNavigatedTimed()
+        api.Page.frameNavigated()
+            .timestamp()
             .observeOn(Schedulers.io())
             .filter { it.value().frame.id == frameId.get() }
             .subscribe { event ->
@@ -107,7 +108,8 @@ class Document(
                 }
             }
 
-        api.Page.frameStartedLoadingTimed()
+        api.Page.frameStartedLoading()
+            .timestamp()
             .observeOn(Schedulers.io())
             .filter { it.value().frameId == frameId.get() }
             .subscribe { event ->
@@ -121,7 +123,8 @@ class Document(
                 })
             }
 
-        api.Page.frameStoppedLoadingTimed()
+        api.Page.frameStoppedLoading()
+            .timestamp()
             .observeOn(Schedulers.io())
             .filter { it.value().frameId == frameId.get() }
             .subscribe { event ->
@@ -130,7 +133,8 @@ class Document(
                 }
             }
 
-        api.Page.lifecycleEventTimed()
+        api.Page.lifecycleEvent()
+            .timestamp()
             .observeOn(Schedulers.io())
             .doOnNext { event ->
                 logger.timedInfo(event.time(), "Lifecycle event ${event.value().name} fired")
@@ -159,7 +163,7 @@ class Document(
             }
 
         context.enableDOM.flatMapObservable {
-            api.DOM.documentUpdatedTimed().toObservable()
+            api.DOM.documentUpdated().timestamp().toObservable()
         }
         .filter {
             // Reload only while document is loaded
